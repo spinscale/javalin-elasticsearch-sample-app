@@ -1,0 +1,64 @@
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '6.0.0'
+}
+
+repositories {
+  jcenter()
+}
+
+group = 'de.spinscale.javalin'
+version = '0.1.0-SNAPSHOT'
+
+sourceCompatibility = 15
+targetCompatibility = 15
+
+// enable previews for records
+tasks.withType(JavaCompile) {
+  options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test) {
+  jvmArgs += "--enable-preview"
+}
+
+dependencies {
+  compile 'io.javalin:javalin:3.12.0'
+  compile 'gg.jte:jte:1.4.0'
+  compile 'org.slf4j:slf4j-simple:1.8.0-beta4'
+  compile "com.fasterxml.jackson.core:jackson-databind:2.10.3"
+
+  testCompile "org.assertj:assertj-core:3.18.1"
+  testCompile 'org.mockito:mockito-core:3.6.0'
+
+  // use @TestContainers annotation to manage lifecycle in tests
+  testImplementation "org.testcontainers:junit-jupiter:1.15.0"
+  testCompile "org.testcontainers:elasticsearch:1.15.0"
+
+  // jupiter support
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform {
+      excludeTags 'slow'
+    }
+}
+
+task integTest(type: Test) {
+  useJUnitPlatform {
+    includeTags 'slow'
+  }
+}
+
+application {
+  mainClassName = 'app.App'
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'app.App'
+  }
+}
